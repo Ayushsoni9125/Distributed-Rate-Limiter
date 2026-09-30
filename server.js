@@ -1,4 +1,5 @@
 const express = require("express");
+const { connectRedis } = require("./redis");
 
 const app = express();
 
@@ -12,6 +13,12 @@ app.get("/", (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
+async function startServer() {
+    await connectRedis();
+
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
+}
+
+startServer();
