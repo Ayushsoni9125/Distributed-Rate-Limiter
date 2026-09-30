@@ -14,7 +14,20 @@ function rateLimiter(limit, windowInSeconds) {
             await redisClient.expire(key, windowInSeconds);
         }
 
+        // Get the time remaining in the window
+        const ttl = await redisClient.ttl(key);
+
+        // Calculate the number of requests remaining in the window
+        const remaining = Math.max(0, limit - currentCount);
+
+        // Set the rate limit headers
+        res.setHeader("X-RateLimit-Limit", limit);
+        res.setHeader("X-RateLimit-Remaining", remaining);
+        res.setHeader("X-RateLimit-Reset", ttl);
+
         if (currentCount > limit) {
+            res.setHeader("Retry-After", ttl);
+
             return res.status(429).json({
                 message: "Too many requests"
             });
