@@ -1,7 +1,6 @@
 const express = require("express");
 const { connectRedis } = require("./redis");
-const rateLimiter = require("./rateLimiter");
-const rateLimitConfig = require("./config");
+const rateLimitPolicy = require("./rateLimitPolicy");
 
 const app = express();
 
@@ -17,10 +16,7 @@ app.get("/", (req, res) => {
 
 app.get(
   "/api/test",
-  rateLimiter(
-    rateLimitConfig.default.limit,
-    rateLimitConfig.default.windowInSeconds,
-  ),
+  rateLimitPolicy("default"),
   (req, res) => {
     res.json({
       message: "Request allowed",
@@ -30,10 +26,7 @@ app.get(
 
 app.get(
   "/api/products",
-  rateLimiter(
-    rateLimitConfig.products.limit,
-    rateLimitConfig.products.windowInSeconds,
-  ),
+  rateLimitPolicy("products"),
   (req, res) => {
     res.json({
       message: "Products API",
