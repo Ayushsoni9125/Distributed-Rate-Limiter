@@ -10,7 +10,8 @@ function rateLimitPolicy(policyName) {
 
     return rateLimiter(
         policy.limit,
-        policy.windowInSeconds
+        policy.windowInSeconds,
+        rateLimitConfig.failureMode
     );
 }
 

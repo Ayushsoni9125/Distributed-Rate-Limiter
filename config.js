@@ -7,7 +7,9 @@ const rateLimitConfig = {
     products: {
         limit: 3,
         windowInSeconds: 60
-    }
+    },
+
+    failureMode: "open"
 };
 
 module.exports = rateLimitConfig;
