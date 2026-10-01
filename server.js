@@ -1,6 +1,7 @@
 const express = require("express");
 const { connectRedis } = require("./redis");
 const rateLimiter = require("./rateLimiter");
+const rateLimitConfig = require("./config");
 
 const app = express();
 
@@ -14,12 +15,18 @@ app.get("/", (req, res) => {
   });
 });
 
-// 5 requests per minute
-app.get("/api/test", rateLimiter(5, 60), (req, res) => {
-  res.json({
-    message: "Request allowed",
-  });
-});
+app.get(
+  "/api/test",
+  rateLimiter(
+    rateLimitConfig.default.limit,
+    rateLimitConfig.default.windowInSeconds,
+  ),
+  (req, res) => {
+    res.json({
+      message: "Request allowed",
+    });
+  },
+);
 
 async function startServer() {
   await connectRedis();
