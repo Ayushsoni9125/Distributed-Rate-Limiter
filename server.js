@@ -1,6 +1,7 @@
 const express = require("express");
 const { connectRedis } = require("./redis");
 const rateLimitPolicy = require("./rateLimitPolicy");
+const authenticate = require("./auth");
 
 const app = express();
 
@@ -13,6 +14,18 @@ app.get("/", (req, res) => {
     message: "Distributed Rate Limiter API is running",
   });
 });
+
+app.get(
+    "/api/profile",
+    authenticate,
+    rateLimitPolicy("default"),
+    (req, res) => {
+        res.json({
+            message: "Profile API",
+            user: req.user
+        });
+    }
+);
 
 app.get(
   "/api/test",

@@ -2,3 +2,9 @@ node_modules/
 .env
 .env.local
 .next/
+
+# AI tool configs
+.agents/
+.claude/
+.cursor/
+.devin/
