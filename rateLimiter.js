@@ -1,22 +1,18 @@
 const { redisClient } = require("./redis");
 const getClientIdentifier = require("./clientIdentifier");
+const rateLimitScript = require("./rateLimitScript");
+
+
 function rateLimiter(limit, windowInSeconds) {
   return async (req, res, next) => {
-    // using the client's IP address as the identifier.
-    // if we want to use the user id, we can use that instead.
+
     const clientId = getClientIdentifier(req);
     const key = `rate-limit:${clientId}`;
 
-    // increment the counter for the client.
-    const currentCount = await redisClient.incr(key);
-
-    // if the counter is 1, set the expiry time for the key.
-    if (currentCount === 1) {
-      await redisClient.expire(key, windowInSeconds);
-    }
-
-    // Get the time remaining in the window
-    const ttl = await redisClient.ttl(key);
+    const [currentCount, ttl] = await redisClient.eval(rateLimitScript, {
+      keys: [key],
+      arguments: [windowInSeconds.toString()]
+    });
 
     // Calculate the number of requests remaining in the window
     const remaining = Math.max(0, limit - currentCount);
