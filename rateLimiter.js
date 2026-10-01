@@ -7,7 +7,8 @@ function rateLimiter(limit, windowInSeconds) {
   return async (req, res, next) => {
 
     const clientId = getClientIdentifier(req);
-    const key = `rate-limit:${clientId}`;
+    const endpoint = req.baseUrl + req.path;
+    const key = `rate-limit:${clientId}:${endpoint}`;
 
     const [currentCount, ttl] = await redisClient.eval(rateLimitScript, {
       keys: [key],
