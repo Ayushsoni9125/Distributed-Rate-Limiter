@@ -1,14 +1,15 @@
 const { redisClient } = require("./redis");
 const getClientIdentifier = require("./clientIdentifier");
+const getRouteIdentifier = require("./routeIdentifier");
 const rateLimitScript = require("./rateLimitScript");
 
 function rateLimiter(limit, windowInSeconds, failureMode) {
     return async (req, res, next) => {
         try {
             const clientId = getClientIdentifier(req);
-            const endpoint = req.baseUrl + req.path;
+            const routeId = getRouteIdentifier(req);
 
-            const key = `rate-limit:${clientId}:${endpoint}`;
+            const key = `rate-limit:${clientId}:${routeId}`;
 
             const [currentCount, ttl] = await redisClient.eval(rateLimitScript, {
                 keys: [key],
