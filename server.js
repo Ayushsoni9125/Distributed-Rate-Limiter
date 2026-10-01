@@ -28,6 +28,19 @@ app.get(
   },
 );
 
+app.get(
+  "/api/products",
+  rateLimiter(
+    rateLimitConfig.products.limit,
+    rateLimitConfig.products.windowInSeconds,
+  ),
+  (req, res) => {
+    res.json({
+      message: "Products API",
+    });
+  },
+);
+
 async function startServer() {
   await connectRedis();
 
