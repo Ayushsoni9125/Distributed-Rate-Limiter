@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+const prisma = require("./prismaClient");
 async function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
 
@@ -36,11 +36,16 @@ async function authenticate(req, res, next) {
         req.user = user;
 
         next();
-    } catch (error) {
-        return res.status(401).json({
-            message: "Invalid or expired token"
-        });
-    }
+    }    catch (error) {
+    console.error("AUTH ERROR:", error);
+
+    return res.status(401).json({
+        message: "Authentication failed",
+        error: error.message
+    });
 }
+}
+
+
 
 module.exports = authenticate;

@@ -2,7 +2,7 @@ const express = require("express");
 const { connectRedis } = require("./redis");
 const rateLimitPolicy = require("./rateLimitPolicy");
 const authenticate = require("./auth");
-
+const apiKeyRoutes = require("./routes/apiKeyRoutes");
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
@@ -11,6 +11,7 @@ const port = process.env.PORT || 5056;
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/keys", apiKeyRoutes);
 
 app.get("/", (req, res) => {
   res.json({
