@@ -13,4 +13,17 @@ model User {
   password  String
   plan      String   @default("free")
   createdAt DateTime @default(now())
+
+  apiKeys   ApiKey[]
+}
+
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

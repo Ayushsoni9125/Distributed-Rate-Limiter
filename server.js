@@ -2,7 +2,7 @@ const express = require("express");
 const { connectRedis } = require("./redis");
 const rateLimitPolicy = require("./rateLimitPolicy");
 const authenticate = require("./auth");
-const prisma = require("./prismaClient");
+
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
@@ -50,19 +50,7 @@ app.get(
   },
 );
 
-app.get("/api/users", async (req, res) => {
-    try {
-        const users = await prisma.user.findMany();
 
-        res.json(users);
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            message: "Failed to fetch users"
-        });
-    }
-});
 
 async function startServer() {
   await connectRedis();
