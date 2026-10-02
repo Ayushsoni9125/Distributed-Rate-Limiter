@@ -1,13 +1,15 @@
 const prisma = require("../prismaClient");
 const generateApiKey = require("../utils/generateApiKey");
+const bcrypt = require("bcryptjs");
 
 async function createApiKey(req, res) {
     try {
         const key = generateApiKey();
+        const hashedKey = await bcrypt.hash(key, 10);
 
         const apiKey = await prisma.apiKey.create({
             data: {
-                key,
+                key: hashedKey,
                 userId: req.user.id
             }
         });
@@ -58,7 +60,52 @@ async function listApiKeys(req, res) {
     }
 }
 
+async function revokeApiKey(req, res) {
+    try {
+        const apiKeyId = Number(req.params.id);
+
+        if (Number.isNaN(apiKeyId)) {
+            return res.status(400).json({
+                message: "Invalid API key ID"
+            });
+        }
+
+        const apiKey = await prisma.apiKey.findFirst({
+            where: {
+                id: apiKeyId,
+                userId: req.user.id
+            }
+        });
+
+        if (!apiKey) {
+            return res.status(404).json({
+                message: "API key not found"
+            });
+        }
+
+        await prisma.apiKey.update({
+            where: {
+                id: apiKeyId
+            },
+            data: {
+                active: false
+            }
+        });
+
+        res.json({
+            message: "API key revoked successfully"
+        });
+    } catch (error) {
+        console.error("API key revocation error:", error);
+
+        res.status(500).json({
+            message: "Failed to revoke API key"
+        });
+    }
+}
+
 module.exports = {
     createApiKey,
-    listApiKeys
+    listApiKeys,
+    revokeApiKey
 };
