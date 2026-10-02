@@ -4,6 +4,7 @@ const rateLimitPolicy = require("./rateLimitPolicy");
 const authenticate = require("./auth");
 const apiKeyRoutes = require("./routes/apiKeyRoutes");
 const authRoutes = require("./routes/authRoutes");
+const apiKeyAuth = require("./middleware/apiKeyAuth");
 
 const app = express();
 
@@ -39,6 +40,16 @@ app.get(
       message: "Request allowed",
     });
   },
+);
+
+app.get(
+    "/api/key-test",
+    apiKeyAuth,
+    (req, res) => {
+        res.json({
+            message: "API key authentication successful"
+        });
+    }
 );
 
 app.get(
