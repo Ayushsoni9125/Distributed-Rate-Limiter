@@ -31,6 +31,34 @@ async function createApiKey(req, res) {
     }
 }
 
+
+async function listApiKeys(req, res) {
+    try {
+        const apiKeys = await prisma.apiKey.findMany({
+            where: {
+                userId: req.user.id
+            },
+            select: {
+                id: true,
+                createdAt: true,
+                expiresAt: true,
+                active: true
+            }
+        });
+
+        res.json({
+            apiKeys
+        });
+    } catch (error) {
+        console.error("API key listing error:", error);
+
+        res.status(500).json({
+            message: "Failed to fetch API keys"
+        });
+    }
+}
+
 module.exports = {
-    createApiKey
+    createApiKey,
+    listApiKeys
 };
