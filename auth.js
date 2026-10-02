@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,9 +17,23 @@ function authenticate(req, res, next) {
             process.env.JWT_SECRET
         );
 
-        req.user = {
-            id: decoded.userId
-        };
+        const user = await prisma.user.findUnique({
+            where: {
+                id: decoded.userId
+            },
+            select: {
+                id: true,
+                plan: true
+            }
+        });
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found"
+            });
+        }
+
+        req.user = user;
 
         next();
     } catch (error) {
