@@ -3,12 +3,14 @@ const { connectRedis } = require("./redis");
 const rateLimitPolicy = require("./rateLimitPolicy");
 const authenticate = require("./auth");
 const prisma = require("./prismaClient");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
 const port = process.env.PORT || 5056;
 
 app.use(express.json());
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.json({
