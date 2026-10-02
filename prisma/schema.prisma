@@ -20,6 +20,7 @@ model User {
 model ApiKey {
   id        Int      @id @default(autoincrement())
   key       String   @unique
+  keyPrefix String                   // First 8 chars of plaintext key — non-secret lookup index
   userId    Int
   createdAt DateTime @default(now())
   expiresAt DateTime?

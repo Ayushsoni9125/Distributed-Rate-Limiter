@@ -6,19 +6,35 @@ async function createApiKey(req, res) {
     try {
         const key = generateApiKey();
         const hashedKey = await bcrypt.hash(key, 10);
+        const keyPrefix = key.substring(0, 8); // Non-secret lookup index
+
+        // Optional expiry from request body (ISO 8601 string or null)
+        let expiresAt = null;
+        if (req.body.expiresAt) {
+            expiresAt = new Date(req.body.expiresAt);
+            if (isNaN(expiresAt.getTime())) {
+                return res.status(400).json({ message: "Invalid expiresAt date" });
+            }
+            if (expiresAt <= new Date()) {
+                return res.status(400).json({ message: "expiresAt must be in the future" });
+            }
+        }
 
         const apiKey = await prisma.apiKey.create({
             data: {
                 key: hashedKey,
-                userId: req.user.id
+                keyPrefix,
+                userId: req.user.id,
+                expiresAt
             }
         });
 
+        // Return the plaintext key ONCE — it is not stored and cannot be retrieved again.
         res.status(201).json({
             message: "API key created successfully",
             apiKey: {
                 id: apiKey.id,
-                key: apiKey.key,
+                key,              // plaintext — shown only at creation
                 createdAt: apiKey.createdAt,
                 expiresAt: apiKey.expiresAt,
                 active: apiKey.active
