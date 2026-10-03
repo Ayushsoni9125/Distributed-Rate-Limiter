@@ -1,5 +1,6 @@
 const rateLimitConfig = require("./config");
 const rateLimiter = require("./rateLimiter");
+const slidingWindowRateLimiter = require("./slidingWindowRateLimiter");
 const getPlanPolicy = require("./planPolicy");
 
 function rateLimitPolicy(policyName) {
@@ -12,7 +13,12 @@ function rateLimitPolicy(policyName) {
     return (req, res, next) => {
         const planPolicy = getPlanPolicy(req, policy);
 
-        return rateLimiter(
+        const limiter =
+            policy.algorithm === "sliding-window"
+                ? slidingWindowRateLimiter
+                : rateLimiter;
+
+        return limiter(
             planPolicy.limit,
             planPolicy.windowInSeconds,
             rateLimitConfig.failureMode
