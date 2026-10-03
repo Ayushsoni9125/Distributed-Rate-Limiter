@@ -7,6 +7,10 @@ const planConfig = {
         products: {
             limit: 3,
             windowInSeconds: 60
+        },
+        burst: {
+            capacity: 5,
+            refillRate: 1
         }
     },
 
@@ -18,6 +22,10 @@ const planConfig = {
         products: {
             limit: 20,
             windowInSeconds: 60
+        },
+        burst: {
+            capacity: 20,
+            refillRate: 5
         }
     },
 
@@ -29,6 +37,10 @@ const planConfig = {
         products: {
             limit: 100,
             windowInSeconds: 60
+        },
+        burst: {
+            capacity: 50,
+            refillRate: 10
         }
     }
 };
