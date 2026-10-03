@@ -1,6 +1,7 @@
 const rateLimitConfig = require("./config");
 const rateLimiter = require("./rateLimiter");
 const slidingWindowRateLimiter = require("./slidingWindowRateLimiter");
+const tokenBucketRateLimiter = require("./tokenBucketRateLimiter");
 const getPlanPolicy = require("./planPolicy");
 
 function rateLimitPolicy(policyName) {
@@ -16,6 +17,14 @@ function rateLimitPolicy(policyName) {
             policyName,
             policy
         );
+
+        if (policy.algorithm === "token-bucket") {
+            return tokenBucketRateLimiter(
+                planPolicy.capacity,
+                planPolicy.refillRate,
+                rateLimitConfig.failureMode
+            )(req, res, next);
+        }
 
         const limiter =
             policy.algorithm === "sliding-window"
