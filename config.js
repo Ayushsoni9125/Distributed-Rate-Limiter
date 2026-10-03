@@ -11,6 +11,10 @@ const rateLimitConfig = {
         algorithm: "sliding-window"
     },
 
+    burst: {
+        algorithm: "token-bucket"
+    },
+
     failureMode: "open"
 };
 
