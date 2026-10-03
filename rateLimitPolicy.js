@@ -11,7 +11,11 @@ function rateLimitPolicy(policyName) {
     }
 
     return (req, res, next) => {
-        const planPolicy = getPlanPolicy(req, policy);
+        const planPolicy = getPlanPolicy(
+            req,
+            policyName,
+            policy
+        );
 
         const limiter =
             policy.algorithm === "sliding-window"
