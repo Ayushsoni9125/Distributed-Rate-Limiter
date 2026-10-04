@@ -34,10 +34,10 @@ if tokens >= 1 then
     )
 
     redis.call(
-        "EXPIRE",
-        key,
-        math.ceil(capacity / refillRate)
-    )
+    "EXPIRE",
+    key,
+    math.ceil((capacity / refillRate) * 2)
+)
 
     return {1, tokens, 0}
 end
@@ -56,7 +56,7 @@ redis.call(
 redis.call(
     "EXPIRE",
     key,
-    math.ceil(capacity / refillRate)
+    math.ceil((capacity / refillRate) * 2)
 )
 
 return {0, tokens, retryAfter}
