@@ -8,7 +8,7 @@ local requestId = ARGV[4]
 
 local windowStart = now - window
 
-redis.call("ZREMRANGEBYSCORE", key, "-inf", windowStart)
+redis.call("ZREMRANGEBYSCORE", key, "-inf", "(" .. windowStart)
 
 local currentCount = redis.call("ZCARD", key)
 
