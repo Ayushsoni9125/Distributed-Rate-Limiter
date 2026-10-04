@@ -11,13 +11,14 @@ const app = express();
 const port = process.env.PORT || 5056;
 
 app.use(express.json());
+
 app.use("/api/auth", authRoutes);
 app.use("/api/keys", apiKeyRoutes);
 
 app.get("/", (req, res) => {
-  res.json({
-    message: "Distributed Rate Limiter API is running",
-  });
+    res.json({
+        message: "Distributed Rate Limiter API is running"
+    });
 });
 
 app.get(
@@ -33,16 +34,27 @@ app.get(
 );
 
 app.get(
-  "/api/test",
-  rateLimitPolicy("default"),
-  (req, res) => {
-    res.json({
-      message: "Request allowed",
-    });
-  },
+    "/api/test",
+    authenticate,
+    rateLimitPolicy("default"),
+    (req, res) => {
+        res.json({
+            message: "Request allowed"
+        });
+    }
 );
 
-// API-key authentication test endpoint — now includes rate limiting.
+app.get(
+    "/api/products",
+    authenticate,
+    rateLimitPolicy("products"),
+    (req, res) => {
+        res.json({
+            message: "Products API"
+        });
+    }
+);
+
 app.get(
     "/api/key-test",
     apiKeyAuth,
@@ -56,14 +68,11 @@ app.get(
     }
 );
 
-// Dual-auth endpoint: accepts EITHER a JWT bearer token OR an X-API-Key header.
-// JWT path: authenticate sets req.user.
-// API key path: apiKeyAuth sets req.apiKey + req.user (from the owning user).
-// In both cases planPolicy reads req.user.plan for the correct rate-limit tier.
 function authenticateJwtOrApiKey(req, res, next) {
     if (req.headers["x-api-key"]) {
         return apiKeyAuth(req, res, next);
     }
+
     return authenticate(req, res, next);
 }
 
@@ -81,29 +90,22 @@ app.get(
 );
 
 app.get(
-  "/api/products",
-  rateLimitPolicy("products"),
-  (req, res) => {
-    res.json({
-      message: "Products API",
-    });
-  },
+    "/api/burst",
+    authenticate,
+    rateLimitPolicy("burst"),
+    (req, res) => {
+        res.json({
+            message: "Token Bucket rate limit working"
+        });
+    }
 );
 
-app.get("/api/burst", authenticate, rateLimitPolicy("burst"), (req, res) => {
-    res.json({
-        message: "Token Bucket rate limit working"
-    });
-});
-
-
 async function startServer() {
-  await connectRedis();
+    await connectRedis();
 
-  app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-  });
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
 }
 
 startServer();
-
