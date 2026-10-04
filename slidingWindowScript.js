@@ -24,7 +24,7 @@ if currentCount >= limit then
 end
 
 redis.call("ZADD", key, now, requestId)
-redis.call("EXPIRE", key, window)
+redis.call("EXPIRE", key, math.ceil(window / 1000))
 
 return {1, currentCount + 1, 0}
 `;
