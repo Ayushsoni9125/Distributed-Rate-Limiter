@@ -5,53 +5,67 @@ const { connectRedis, redisClient } = require("../redis");
 const prisma = require("../prismaClient");
 
 describe("Fixed Window Rate Limiter", () => {
-    let token;
+  let token;
 
-    beforeAll(async () => {
-        await connectRedis();
+  beforeAll(async () => {
+    await connectRedis();
 
-        const email = `test-${Date.now()}@example.com`;
+    const email = `test-${Date.now()}@example.com`;
 
-        await request(app)
-            .post("/api/auth/register")
-            .send({
-                name: "Rate Limit Test",
-                email,
-                password: "Test@123"
-            })
-            .expect(201);
+    await request(app)
+      .post("/api/auth/register")
+      .send({
+        name: "Rate Limit Test",
+        email,
+        password: "Test@123",
+      })
+      .expect(201);
 
-        const loginResponse = await request(app)
-            .post("/api/auth/login")
-            .send({
-                email,
-                password: "Test@123"
-            })
-            .expect(200);
+    const loginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email,
+        password: "Test@123",
+      })
+      .expect(200);
 
-        token = loginResponse.body.token;
-    });
+    token = loginResponse.body.token;
+  });
 
-    afterAll(async () => {
-        await redisClient.quit();
-        await prisma.$disconnect();
-    });
+  afterAll(async () => {
+    await redisClient.quit();
+    await prisma.$disconnect();
+  });
 
-    test("allows 5 requests and blocks the 6th request", async () => {
-        const responses = [];
+  test("allows 5 requests and blocks the 6th request", async () => {
+    const responses = [];
 
-        for (let i = 0; i < 6; i++) {
-            const response = await request(app)
-                .get("/api/test")
-                .set("Authorization", `Bearer ${token}`);
+    for (let i = 0; i < 6; i++) {
+      const response = await request(app)
+        .get("/api/test")
+        .set("Authorization", `Bearer ${token}`);
 
-            responses.push(response);
-        }
+      responses.push(response);
+    }
 
-        expect(
-            responses.slice(0, 5).every(r => r.statusCode === 200)
-        ).toBe(true);
+    expect(responses.slice(0, 5).every((r) => r.statusCode === 200)).toBe(true);
 
-        expect(responses[5].statusCode).toBe(429);
-    });
+    expect(responses[5].statusCode).toBe(429);
+  });
+
+  test("allows 3 requests and blocks the 4th request", async () => {
+    const responses = [];
+
+    for (let i = 0; i < 4; i++) {
+      const response = await request(app)
+        .get("/api/products")
+        .set("Authorization", `Bearer ${token}`);
+
+      responses.push(response);
+    }
+
+    expect(responses.slice(0, 3).every((r) => r.statusCode === 200)).toBe(true);
+
+    expect(responses[3].statusCode).toBe(429);
+  });
 });
