@@ -90,12 +90,11 @@ app.get(
   },
 );
 
-app.get("/api/burst", rateLimitPolicy("burst"), (req, res) => {
+app.get("/api/burst", authenticate, rateLimitPolicy("burst"), (req, res) => {
     res.json({
         message: "Token Bucket rate limit working"
     });
 });
-
 
 
 async function startServer() {
