@@ -68,4 +68,22 @@ describe("Fixed Window Rate Limiter", () => {
 
     expect(responses[3].statusCode).toBe(429);
   });
+
+  test("allows 5 requests and blocks the 6th request", async () => {
+    const responses = [];
+
+    for (let i = 0; i < 6; i++) {
+        const response = await request(app)
+            .get("/api/burst")
+            .set("Authorization", `Bearer ${token}`);
+
+        responses.push(response);
+    }
+
+    expect(
+        responses.slice(0, 5).every(r => r.statusCode === 200)
+    ).toBe(true);
+
+    expect(responses[5].statusCode).toBe(429);
+});
 });
