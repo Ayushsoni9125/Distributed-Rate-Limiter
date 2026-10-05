@@ -34,7 +34,8 @@ async function createApiKey(req, res) {
             message: "API key created successfully",
             apiKey: {
                 id: apiKey.id,
-                key,              // plaintext — shown only at creation
+                key,         // plaintext — shown only at creation
+                keyPrefix: apiKey.keyPrefix,     
                 createdAt: apiKey.createdAt,
                 expiresAt: apiKey.expiresAt,
                 active: apiKey.active
